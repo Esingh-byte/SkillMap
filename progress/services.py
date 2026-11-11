@@ -292,7 +292,7 @@ def complete_node(user, node: Node) -> bool:
                 nxt.unlocked_at = now
                 nxt.save(update_fields=["status", "unlocked_at"])
 
-        type(user).objects.filter(pk=user.pk).update(xp=F("xp") + XP_PER_NODE_COMPLETED)
+        user.__class__.objects.filter(pk=user.pk).update(xp=F("xp") + XP_PER_NODE_COMPLETED)
         user.refresh_from_db(fields=["xp"])
         update_streak(user)
 
@@ -325,3 +325,32 @@ def roadmap_progress(user, roadmap: Roadmap) -> dict:
     ).count()
     percent = int(completed * 100 / total) if total else 0
     return {"completed": completed, "total": total, "percent": percent}
+
+
+def node_video_totals(user, node: Node) -> dict:
+    """Return {"watched_seconds": int, "duration_seconds": int} over the node's
+    EMBEDDABLE videos (watched is capped per video at its duration)."""
+    videos = list(node.videos.filter(is_embeddable=True))
+    watched_map = dict(
+        VideoProgress.objects.filter(user=user, video__in=videos).values_list(
+            "video_id", "watched_seconds"
+        )
+    )
+    return {
+        "watched_seconds": sum(
+            min(watched_map.get(v.pk, 0), v.duration_seconds) for v in videos
+        ),
+        "duration_seconds": sum(v.duration_seconds for v in videos),
+    }
+
+
+def node_statuses(user, roadmap: Roadmap) -> dict:
+    """Map node_id -> NodeProgress status string for the user (missing = LOCKED)."""
+    rows = dict(
+        NodeProgress.objects.filter(user=user, node__roadmap=roadmap).values_list(
+            "node_id", "status"
+        )
+    )
+    return {
+        n.pk: rows.get(n.pk, NodeProgress.Status.LOCKED) for n in roadmap.nodes.all()
+    }

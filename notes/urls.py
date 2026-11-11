@@ -4,5 +4,5 @@ from . import views
 app_name = "notes"
 
 urlpatterns = [
-    path("<int:node_pk>/", views.note_edit, name="edit"),
+    path("<int:node_id>/save/", views.save, name="save"),
 ]

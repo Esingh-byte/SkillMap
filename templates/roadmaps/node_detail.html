@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ node.title }}{% endblock %}
+{% block content %}
+{% csrf_token %}
+<p><a href="{% url 'roadmaps:detail' roadmap.slug %}">&larr; {{ roadmap.title }}</a></p>
+<h1>{{ node.title }} <small>({{ status }})</small></h1>
+<p>{{ node.description }}</p>
+
+<h2>Videos</h2>
+{% for row in videos %}
+  <div>
+    <h3>{{ row.video.title }}</h3>
+    <div id="player-{{ row.video.pk }}" class="yt-player"
+         data-video-id="{{ row.video.pk }}" data-youtube-id="{{ row.video.youtube_id }}"></div>
+    <small>{{ row.video.channel_name }} - watched {{ row.watched_seconds }}/{{ row.video.duration_seconds }}s</small>
+  </div>
+{% empty %}
+  <p>No embeddable videos.</p>
+{% endfor %}
+<p id="video-status">Video check: {% if video_passed %}passed{% else %}not yet passed{% endif %}</p>
+
+<h2>Notes</h2>
+<textarea id="note" rows="6" cols="60">{{ note.content }}</textarea>
+<span id="note-status"></span>
+
+<h2>Quiz</h2>
+{% if not has_quiz %}
+  <p>No quiz for this node.</p>
+{% elif quiz_passed %}
+  <p>Quiz passed.</p>
+{% elif not video_passed %}
+  <p>Finish watching the videos to unlock the quiz.</p>
+{% else %}
+  <form id="quiz-form">
+    {% for q in questions %}
+      <fieldset>
+        <legend>{{ forloop.counter }}. {{ q.text }}</legend>
+        {% for c in q.choices.all %}
+          <label><input type="radio" name="{{ q.pk }}" value="{{ c.pk }}"> {{ c.text }}</label><br>
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+    <button type="submit">Submit quiz</button>
+  </form>
+  <p id="quiz-result"></p>
+{% endif %}
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const csrf = document.querySelector("[name=csrfmiddlewaretoken]").value;
+function postJSON(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+    body: JSON.stringify(body),
+  }).then(r => r.json());
+}
+
+// Anti-cheat heartbeat every 5s while PLAYING (server computes credit).
+function onYouTubeIframeAPIReady() {
+  document.querySelectorAll(".yt-player").forEach(el => {
+    let timer = null;
+    const beat = player => postJSON("{% url 'progress:heartbeat' %}", {
+      video_id: parseInt(el.dataset.videoId),
+      current_time: player.getCurrentTime(),
+      playback_rate: player.getPlaybackRate(),
+    }).then(d => {
+      if (d.status === "ok") {
+        document.getElementById("video-status").textContent =
+          "Video check: " + (d.video_passed ? "passed (reload for quiz)" : d.watched_seconds + "/" + d.duration_seconds + "s");
+      }
+    });
+    new YT.Player(el.id, {
+      videoId: el.dataset.youtubeId,
+      events: {onStateChange: e => {
+        clearInterval(timer);
+        if (e.data === YT.PlayerState.PLAYING) {
+          beat(e.target);
+          timer = setInterval(() => beat(e.target), 5000);
+        }
+      }},
+    });
+  });
+}
+
+// Notes auto-save (debounced).
+let noteTimer = null;
+document.getElementById("note").addEventListener("input", e => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    postJSON("{% url 'notes:save' node.pk %}", {content: e.target.value}).then(d => {
+      document.getElementById("note-status").textContent = d.status === "saved" ? "Saved " + d.updated_at : "Error";
+    });
+  }, 800);
+});
+
+// Quiz submission.
+const quizForm = document.getElementById("quiz-form");
+if (quizForm) {
+  quizForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const answers = {};
+    new FormData(quizForm).forEach((v, k) => { answers[k] = parseInt(v); });
+    postJSON("{% url 'quizzes:submit' node.pk %}", {answers}).then(d => {
+      document.getElementById("quiz-result").textContent = d.error ||
+        (d.passed ? "Passed" : "Not passed") + " - score " + d.score_percent + "%" +
+        (d.node_completed ? " - node completed, +" + d.xp_awarded + " XP" : "");
+    });
+  });
+}
+</script>
+{% endblock %}

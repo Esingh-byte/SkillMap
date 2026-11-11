@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ roadmap.title }}{% endblock %}
+{% block content %}
+<h1>{{ roadmap.title }}</h1>
+<p>{{ roadmap.description }}</p>
+{% if roadmap.source_attribution %}<p><small>Source: {{ roadmap.source_attribution }}</small></p>{% endif %}
+<p>Progress: {{ progress.completed }}/{{ progress.total }} ({{ progress.percent }}%)</p>
+<ol>
+  {% for row in nodes %}
+    <li>
+      {% if row.status == "LOCKED" %}
+        {{ row.node.title }} - LOCKED
+      {% else %}
+        <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}">{{ row.node.title }}</a> - {{ row.status }}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ol>
+{% endblock %}

@@ -296,9 +296,17 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
 - Admin Video list crash fixed; admin smoke tests (`roadmaps/tests/test_admin_smoke.py`)
 - Progression engine (`progress/services.py`) with unit tests
 - Venv, `.gitignore`, `.env.example`, git + GitHub remote
+- Core views, URLs and JSON endpoints (simple functional templates in `templates/`, unstyled) with tests in `*/tests/test_views.py`:
+  - `accounts`: login / logout (POST) / signup (`accounts/signup/`)
+  - `roadmaps`: `roadmap_list` (public, `?category=<slug>` filter), `roadmap_detail` (login; auto-enrolls), `node_detail` (login; 403 if not enrolled or LOCKED)
+  - `POST /progress/heartbeat/` → `{status, watched_seconds, duration_seconds (node-level, embeddable videos), video_passed, node_completed}`; errors: NotEnrolled/NodeLocked 403, VideoNotEmbeddable/bad input 400
+  - `POST /quizzes/<node_id>/submit/` → `{passed, score_percent, node_completed, xp_awarded}`; errors: VideoCheckNotPassed/NodeLocked 403, InvalidAnswer 400
+  - `POST /notes/<node_id>/save/` (JSON or form) → `{status: "saved", updated_at}`
+  - All progress/quiz/note endpoints use `@login_required` (anonymous → 302 to login). JSON errors: `{status: "error", error: msg}`. Helpers in `roadmaplearn/http.py`.
 
 ### Pending
-- Views and UI
+- Styling (Tailwind/HTMX) of templates
+- Dashboard view (still a stub), roadmap bookmark/search views
 - YouTube playlist importer
 - Dashboard
 - Bookmarks and search
