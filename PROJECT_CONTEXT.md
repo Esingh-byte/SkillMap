@@ -262,3 +262,22 @@ Indexes: slug
 unique_together: (user, badge)
 Indexes: (user, badge)
 Admin: READ-ONLY
+
+---
+
+## Project status
+
+### Done
+- Models
+- Customised admin (nested)
+- `seed_demo` command
+- Venv and git setup
+
+### Pending
+- Fix admin Video list crash
+- Progression engine (unlock + anti-cheat)
+- Views and UI
+- YouTube playlist importer
+- Dashboard
+- Bookmarks and search
+- Documentation
