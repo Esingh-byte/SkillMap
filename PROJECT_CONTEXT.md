@@ -273,7 +273,7 @@ Admin: READ-ONLY
 - Django 6: `format_html()` needs at least one argument; use `mark_safe` for static HTML.
 - Secrets only via `.env`; never commit `.env`, `db.sqlite3`, `.venv`.
 - Ask before adding any dependency. If a model change or migration is needed, stop and ask first.
-- Small steps; run tests and `manage.py check` after each task; commit; never push.
+- Small steps; run tests and `manage.py check` after each task; commit; automatically push clean commits to `origin main` (only essential code, tests, and config; never temporary/scratch files).
 
 ## Progression rules
 Implemented in `progress/services.py` (tests in `progress/tests/test_services.py`). Constants: `VIDEO_COMPLETION_THRESHOLD=0.9`, `HEARTBEAT_TOLERANCE_SECONDS=2.0`, `MAX_PLAYBACK_RATE=2.0`, `MIN_PLAYBACK_RATE=0.25`, `XP_PER_NODE_COMPLETED=50`.
