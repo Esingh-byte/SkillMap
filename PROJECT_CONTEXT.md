@@ -265,17 +265,27 @@ Admin: READ-ONLY
 
 ---
 
+## Agent rules (tool-independent)
+- Django 6.1 monolith; Django templates + HTMX + Tailwind; no React; SQLite for dev.
+- Read PROJECT_CONTEXT.md before each task; update it when models or rules change.
+- Use existing names exactly (`Video`, not Resource; `Node.quiz_pass_mark`; User `xp` / `streak_days` / `last_active_date`). Never rename without asking.
+- Business logic lives in `services.py` with unit tests, never in views.
+- Django 6: `format_html()` needs at least one argument; use `mark_safe` for static HTML.
+- Secrets only via `.env`; never commit `.env`, `db.sqlite3`, `.venv`.
+- Ask before adding any dependency. If a model change or migration is needed, stop and ask first.
+- Small steps; run tests and `manage.py check` after each task; commit; never push.
+
 ## Project status
 
 ### Done
-- Models
-- Customised admin (nested)
+- 16 models in 6 apps, with `__str__` and indexes
+- Customised admin (django-nested-admin; read-only admin for progress/attempt models)
 - `seed_demo` command
-- Venv and git setup
+- Admin Video list crash fixed; admin smoke tests (`roadmaps/tests/test_admin_smoke.py`)
+- Venv, `.gitignore`, `.env.example`, git + GitHub remote
 
 ### Pending
-- Fix admin Video list crash
-- Progression engine (unlock + anti-cheat)
+- Progression engine (`progress/services.py`, `quizzes/services.py`)
 - Views and UI
 - YouTube playlist importer
 - Dashboard
