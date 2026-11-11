@@ -16,7 +16,7 @@ Then the next node (by `order`) becomes UNLOCKED.
 
 ## Anti-cheat design (important)
 - Use the YouTube IFrame Player API on the client. Do NOT redirect to youtube.com.
-- Client sends a heartbeat every 5 seconds while the player state is PLAYING: {resource_id, current_time}.
+- Client sends a heartbeat every 5 seconds while the player state is PLAYING: {video_id, current_time}.
 - Server NEVER trusts the client's totals. On each heartbeat the server adds
   min(reported_forward_delta, real_elapsed_seconds_since_last_heartbeat + 2s tolerance)
   to watched_seconds. Seeking forward therefore does not add credit.
@@ -275,6 +275,18 @@ Admin: READ-ONLY
 - Ask before adding any dependency. If a model change or migration is needed, stop and ask first.
 - Small steps; run tests and `manage.py check` after each task; commit; never push.
 
+## Progression rules
+Implemented in `progress/services.py` (tests in `progress/tests/test_services.py`). Constants: `VIDEO_COMPLETION_THRESHOLD=0.9`, `HEARTBEAT_TOLERANCE_SECONDS=2.0`, `MAX_PLAYBACK_RATE=2.0`, `MIN_PLAYBACK_RATE=0.25`, `XP_PER_NODE_COMPLETED=50`.
+- `NodeProgress.status` defaults to LOCKED. `enroll_user` UNLOCKS only the lowest-`order` node; `Node` itself has no status field.
+- Heartbeat is rejected for non-enrolled users (`NotEnrolledError`), LOCKED nodes (`NodeLockedError`) and non-embeddable videos (`VideoNotEmbeddableError`).
+- `playback_rate` is clamped to [0.25, 2.0].
+- Credit: first heartbeat credits 0. Later: `delta = current_time - last_position`; if `delta <= 0` credit 0, else `credit = min(delta, elapsed * rate + 2.0)`. `watched_seconds` (integer column, so credit is rounded to whole seconds) never decreases and never exceeds `Video.duration_seconds`.
+- Video check: sum of `min(watched, duration)` over EMBEDDABLE videos >= 0.9 * sum of their durations. A node with no embeddable videos (or zero total duration) passes automatically.
+- Quiz: needs an unlocked node and a passed video check; unanswered = wrong; pass when score >= `Node.quiz_pass_mark`; every attempt is stored in `QuizAttempt`. Foreign questions/choices raise `InvalidAnswerError`.
+- `complete_node` is atomic and idempotent: sets COMPLETED, unlocks the next higher `order` only if LOCKED, awards XP once, updates streak.
+- Nodes without a quiz (or with no questions) complete via `try_complete_node_without_quiz` once the video check passes.
+- Streak: same day no change; yesterday +1; otherwise reset to 1.
+
 ## Project status
 
 ### Done
@@ -282,10 +294,10 @@ Admin: READ-ONLY
 - Customised admin (django-nested-admin; read-only admin for progress/attempt models)
 - `seed_demo` command
 - Admin Video list crash fixed; admin smoke tests (`roadmaps/tests/test_admin_smoke.py`)
+- Progression engine (`progress/services.py`) with unit tests
 - Venv, `.gitignore`, `.env.example`, git + GitHub remote
 
 ### Pending
-- Progression engine (`progress/services.py`, `quizzes/services.py`)
 - Views and UI
 - YouTube playlist importer
 - Dashboard
