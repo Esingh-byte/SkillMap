@@ -49,3 +49,6 @@ build/
 htmlcov/
 .pytest_cache/
 .tox/
+
+# Cursor
+.cursor/
