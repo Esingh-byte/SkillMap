@@ -13,7 +13,7 @@ Hierarchy in the admin:
 from django import forms
 from django.contrib import admin
 from django.db.models import Count, Sum
-from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 import nested_admin
 
@@ -248,8 +248,8 @@ class VideoAdmin(admin.ModelAdmin):
     @admin.display(description="Embeddable?", boolean=False, ordering="is_embeddable")
     def embeddable_icon(self, obj):
         if obj.is_embeddable:
-            return format_html('<span style="color:green;font-weight:bold;">✔</span>')
-        return format_html('<span style="color:red;font-weight:bold;">✘ NOT EMBEDDABLE</span>')
+            return mark_safe('<span style="color:green;font-weight:bold;">✔</span>')
+        return mark_safe('<span style="color:red;font-weight:bold;">✘ NOT EMBEDDABLE</span>')
 
 
 # ---------------------------------------------------------------------------
