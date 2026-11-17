@@ -294,6 +294,19 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
 - **Component classes (`static/css/app.css`, plain CSS, no `@apply`)**: `.sk-card` (`2px solid var(--ink)`, `border-radius: 6px`, `4px 4px 0 var(--ink)` shadow), `.sk-btn`, `.sk-btn--primary` (marigold bg, ink text), `.sk-btn--ghost`, `.sk-badge`, `.sk-input` (and `.sk-form` inputs), `.sk-hatch` (SVG diagonal hatch for locked items), `.sk-mono`, `.sk-blocks` (segmented progress blocks: `.sk-block--filled`, `.sk-block--active`, `.sk-block--empty`), `.sk-alert`.
 - **Forbidden**: CSS gradients, glassmorphism/backdrop blur, glows or ring effects, pulse animations, emoji as icons, big `rounded-2xl` cards, icon-in-coloured-circle cards, centered hero with two buttons. Use small inline SVG icons (`stroke-width="2"`) and always pair status colours with icons + text.
 
+## Content pipeline
+- **`dump_playlist <playlist_id_or_url> --out data/playlists/<name>.json`** (`roadmaps/management/commands/dump_playlist.py`):
+  - Uses standard library `urllib.request` (`fetch_json(url)`) to query YouTube Data API v3 (`playlistItems.list` with `maxResults=50` and pagination, followed by `videos.list` in chunks of 50 IDs) using `settings.YOUTUBE_API_KEY`.
+  - Scrubs `YOUTUBE_API_KEY` from all URLs and error messages (`scrub_api_key`).
+  - Parses ISO 8601 durations (`parse_iso8601_duration`), skips private/deleted videos while preserving original 1-based playlist positions, and prints a summary (`total`, `embeddable`, `non_embeddable`, `skipped`, `duration` in hours).
+- **`import_roadmap <path/to/roadmap.json> [--dry-run] [--allow-non-embeddable]`** (`roadmaps/management/commands/import_roadmap.py`):
+  - Works completely offline against a dumped playlist JSON file (`data/playlists/<name>.json`).
+  - Validates the entire file upfront and reports all errors at once (missing required keys, missing playlist positions, non-embeddable videos unless `--allow-non-embeddable`, nodes with `< 1` video, duplicate node titles, and questions violating `>= 2` choices or `exactly 1` correct choice).
+  - Writes inside a single `transaction.atomic()`, temporarily shifting `Node.order` and `Video.order` to high values to avoid `(roadmap, order)` and `(node, order)` unique constraint collisions when reordering.
+  - Protects student data: never deletes `Video` rows that have `VideoProgress`, and never alters a `Quiz` that has `QuizAttempt` rows.
+  - Idempotent: re-running on an unchanged file creates/updates 0 rows.
+  - Sample offline files live in `data/playlists/example.json`, `data/roadmaps/example.json`, and `data/README.md`.
+
 ## Project status
 
 ### Done
@@ -310,12 +323,14 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
   - `POST /quizzes/<node_id>/submit/` → `{passed, score_percent, node_completed, xp_awarded}`; errors: VideoCheckNotPassed/NodeLocked 403, InvalidAnswer 400
   - `POST /notes/<node_id>/save/` (JSON or form) → `{status: "saved", updated_at}`
   - All progress/quiz/note endpoints use `@login_required` (anonymous → 302 to login). JSON errors: `{status: "error", error: msg}`. Helpers in `roadmaplearn/http.py`.
-- Design system (`static/css/app.css`) and restyled `base.html`, `roadmap_list.html`, `accounts/login.html`, `accounts/signup.html`
+- Design system (`static/css/app.css`) and restyled `base.html`, `roadmap_list.html`, `roadmap_detail.html`, `node_detail.html`, `accounts/login.html`, `accounts/signup.html`
+  - **Context variables not currently provided by views (views left unchanged)**:
+    - `roadmap_list`: `total_duration` (sum of video durations per roadmap) and per-user enrollment/progress status (`Start` vs `Continue`).
+    - `node_detail`: `next_node` (direct next `Node` object for the "Next topic" CTA; currently links back to `roadmaps:detail`), `nodes` / `node_statuses` (full roadmap syllabus with per-node `NodeProgress` status when reviewing an earlier completed node; currently inferred sequentially via `n.order < node.order`), and node-level aggregated watch totals (`total_watched_seconds`, `total_duration_seconds`, `remaining_seconds_needed`, `MM:SS` formatted durations).
+- Content pipeline (`dump_playlist` and `import_roadmap` management commands, `data/` example files and docs, unit tests in `roadmaps/tests/test_content_pipeline.py`)
 
 ### Pending
-- Restyle `roadmap_detail.html` and `node_detail.html`
 - Dashboard view (still a stub), roadmap bookmark/search views
-- YouTube playlist importer
 - Dashboard
 - Bookmarks and search
 - Documentation

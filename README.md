@@ -154,7 +154,23 @@ Open **http://127.0.0.1:8000/admin/** and log in with your superuser credentials
 | `DB_PASSWORD` | _(empty)_ | Database password |
 | `DB_HOST` | _(empty)_ | Database host |
 | `DB_PORT` | _(empty)_ | Database port |
-| `YOUTUBE_API_KEY` | _(empty)_ | YouTube Data API v3 key (for `import_playlist` command) |
+| `YOUTUBE_API_KEY` | _(empty)_ | YouTube Data API v3 key (for `dump_playlist` command) |
+
+---
+
+## Adding a Roadmap
+
+Roadmaps are imported in two steps (see `data/README.md` for full JSON schemas):
+
+1. **Dump a YouTube playlist** (requires `YOUTUBE_API_KEY` in `.env`):
+   ```powershell
+   .\.venv\Scripts\python.exe manage.py dump_playlist <playlist_id_or_url> --out data/playlists/<name>.json
+   ```
+2. **Validate & import a roadmap JSON file** (runs completely offline):
+   ```powershell
+   .\.venv\Scripts\python.exe manage.py import_roadmap data/roadmaps/example.json --dry-run
+   .\.venv\Scripts\python.exe manage.py import_roadmap data/roadmaps/example.json
+   ```
 
 ---
 

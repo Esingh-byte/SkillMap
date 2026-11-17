@@ -1,0 +1,40 @@
+{
+  "playlist_id": "PLexampleFictionalPlaylist001",
+  "title": "Fictional Python Crash Course",
+  "channel": "Example Code Academy",
+  "fetched_at": "2026-11-17T08:00:00+00:00",
+  "videos": [
+    {
+      "position": 1,
+      "video_id": "exVid000001",
+      "title": "1. Installing Python and Running Your First Script",
+      "channel": "Example Code Academy",
+      "duration_seconds": 420,
+      "embeddable": true
+    },
+    {
+      "position": 2,
+      "video_id": "exVid000002",
+      "title": "2. Variables, Types, and Basic Expressions",
+      "channel": "Example Code Academy",
+      "duration_seconds": 540,
+      "embeddable": true
+    },
+    {
+      "position": 3,
+      "video_id": "exVid000003",
+      "title": "3. Conditionals and Loops in Practice",
+      "channel": "Example Code Academy",
+      "duration_seconds": 600,
+      "embeddable": true
+    },
+    {
+      "position": 4,
+      "video_id": "exVid000004",
+      "title": "4. Writing Reusable Functions",
+      "channel": "Example Code Academy",
+      "duration_seconds": 480,
+      "embeddable": true
+    }
+  ]
+}

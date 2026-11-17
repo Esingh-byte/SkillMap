@@ -1,0 +1,56 @@
+{
+  "slug": "example-python-foundations",
+  "title": "Example Python Foundations",
+  "description": "A concise two-step introductory Python roadmap built from the offline example playlist.",
+  "category": "Programming",
+  "source_attribution": "roadmap.sh – Python Roadmap",
+  "is_published": false,
+  "playlist": "data/playlists/example.json",
+  "nodes": [
+    {
+      "title": "Getting Started & Variables",
+      "description": "Set up your Python environment and learn core primitive types.",
+      "section_label": "Fundamentals",
+      "quiz_pass_mark": 60,
+      "videos": [1, 2],
+      "quiz": [
+        {
+          "text": "Which function displays output in the terminal in Python?",
+          "explanation": "print() writes objects to standard output.",
+          "choices": [
+            {"text": "echo()", "correct": false},
+            {"text": "print()", "correct": true},
+            {"text": "console.log()", "correct": false}
+          ]
+        },
+        {
+          "text": "What is the type of the literal value 42 in Python?",
+          "explanation": "Whole numbers without a decimal point are integers (int).",
+          "choices": [
+            {"text": "int", "correct": true},
+            {"text": "float", "correct": false},
+            {"text": "str", "correct": false}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Control Flow & Functions",
+      "description": "Branch with if/else, iterate with loops, and package logic into functions.",
+      "section_label": "Fundamentals",
+      "quiz_pass_mark": 60,
+      "videos": [3, 4],
+      "quiz": [
+        {
+          "text": "Which keyword starts a function definition in Python?",
+          "explanation": "Python uses the 'def' keyword followed by the function name.",
+          "choices": [
+            {"text": "func", "correct": false},
+            {"text": "def", "correct": true},
+            {"text": "function", "correct": false}
+          ]
+        }
+      ]
+    }
+  ]
+}
