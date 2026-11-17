@@ -1,0 +1,27 @@
+<form method="post"
+      action="{% url 'roadmaps:bookmark' roadmap.slug %}"
+      hx-post="{% url 'roadmaps:bookmark' roadmap.slug %}"
+      hx-swap="outerHTML"
+      class="inline">
+  {% csrf_token %}
+  {% if request %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% endif %}
+  <button type="submit"
+          class="sk-btn text-xs py-1 px-2.5 {% if is_bookmarked %}sk-btn--primary{% endif %}"
+          aria-pressed="{% if is_bookmarked %}true{% else %}false{% endif %}"
+          title="{% if is_bookmarked %}Remove from saved roadmaps{% else %}Save this roadmap{% endif %}">
+    <svg class="w-3.5 h-3.5 shrink-0"
+         role="img"
+         aria-label="{% if is_bookmarked %}Saved{% else %}Save{% endif %}"
+         viewBox="0 0 24 24"
+         fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}"
+         stroke="currentColor"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>{% if is_bookmarked %}Saved{% else %}Save{% endif %}</span>
+  </button>
+</form>

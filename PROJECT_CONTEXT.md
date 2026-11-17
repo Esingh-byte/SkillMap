@@ -329,8 +329,11 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
     - `node_detail`: `next_node` (direct next `Node` object for the "Next topic" CTA; currently links back to `roadmaps:detail`), `nodes` / `node_statuses` (full roadmap syllabus with per-node `NodeProgress` status when reviewing an earlier completed node; currently inferred sequentially via `n.order < node.order`), and node-level aggregated watch totals (`total_watched_seconds`, `total_duration_seconds`, `remaining_seconds_needed`, `MM:SS` formatted durations).
 - Content pipeline (`dump_playlist` and `import_roadmap` management commands, `data/` example files and docs, unit tests in `roadmaps/tests/test_content_pipeline.py`)
 - Badge engine & Dashboard (`dashboard/services.py`, `seed_badges` management command, `award_badges` hooked into `complete_node`, `submit_quiz`, and `save_note`, `effective_streak`, `@login_required` dashboard view at `/`, `templates/dashboard/home.html`, and 15 unit/view tests in `dashboard/tests.py`)
+- Bookmarks & Roadmap Search:
+  - `search_roadmaps(q, category=None)` in `roadmaps/services.py` (case-insensitive ORM search across roadmap title, description, category name, and node titles; distinct results; unpublished hidden; title matches ranked above description/category/node matches; paginated at 12 per page preserving `q` and `category`).
+  - `POST /roadmaps/<slug>/bookmark/` (`roadmaps:bookmark`, login required, CSRF): toggles `RoadmapBookmark` on published roadmaps; returns `_bookmark_button.html` partial for HTMX requests or redirects back with a Django message for non-JS requests.
+  - `GET /roadmaps/saved/` (`roadmaps:saved`, login required): displays the current user's bookmarked published roadmaps with an empty state, linked from the navbar when logged in.
+  - Unit and view tests in `roadmaps/tests/test_bookmarks_and_search.py`.
 
 ### Pending
-- Roadmap bookmark/search views
-- Bookmarks and search
 - Documentation

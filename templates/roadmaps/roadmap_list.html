@@ -10,10 +10,36 @@
   </div>
 </section>
 
-<section class="mb-8" aria-label="Filter roadmaps by category">
+<!-- Search and Category Filters -->
+<section class="mb-8 space-y-4" aria-label="Search and filter roadmaps">
+  <form method="get" action="{% url 'roadmaps:list' %}" role="search" class="flex flex-wrap items-center gap-3">
+    {% if selected_category %}
+      <input type="hidden" name="category" value="{{ selected_category }}">
+    {% endif %}
+    <div class="flex-1 min-w-[220px] max-w-md">
+      <label for="roadmap-search-q" class="sr-only">Search roadmaps by title, description, category, or topic</label>
+      <input id="roadmap-search-q"
+             type="search"
+             name="q"
+             value="{{ q }}"
+             placeholder="Search by roadmap, category, or topic..."
+             class="sk-input text-sm">
+    </div>
+    <button type="submit" class="sk-btn sk-btn--primary text-sm">
+      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span>Search</span>
+    </button>
+    {% if q or selected_category %}
+      <a href="{% url 'roadmaps:list' %}" class="sk-btn sk-btn--ghost text-sm">Clear filters</a>
+    {% endif %}
+  </form>
+
   <div class="flex flex-wrap items-center gap-2.5">
     <span class="text-xs font-bold uppercase tracking-wider text-muted mr-1 sk-mono">Category:</span>
-    <a href="{% url 'roadmaps:list' %}"
+    <a href="{% url 'roadmaps:list' %}{% if q %}?q={{ q|urlencode }}{% endif %}"
        class="sk-btn text-sm py-1.5 px-3.5 {% if not selected_category %}sk-btn--primary{% endif %}"
        {% if not selected_category %}aria-current="page"{% endif %}>
       {% if not selected_category %}
@@ -24,7 +50,7 @@
       <span>All</span>
     </a>
     {% for c in categories %}
-      <a href="?category={{ c.slug }}"
+      <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}category={{ c.slug }}"
          class="sk-btn text-sm py-1.5 px-3.5 {% if c.slug == selected_category %}sk-btn--primary{% endif %}"
          {% if c.slug == selected_category %}aria-current="page"{% endif %}>
         {% if c.slug == selected_category %}
@@ -50,17 +76,24 @@
               {% else %}
                 <span class="sk-badge">General</span>
               {% endif %}
-              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-muted sk-mono">
-                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="8" y1="6" x2="21" y2="6"/>
-                  <line x1="8" y1="12" x2="21" y2="12"/>
-                  <line x1="8" y1="18" x2="21" y2="18"/>
-                  <line x1="3" y1="6" x2="3.01" y2="6"/>
-                  <line x1="3" y1="12" x2="3.01" y2="12"/>
-                  <line x1="3" y1="18" x2="3.01" y2="18"/>
-                </svg>
-                <span>{{ r.nodes.count }} step{{ r.nodes.count|pluralize }}</span>
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-muted sk-mono">
+                  <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  <span>{{ r.nodes.count }} step{{ r.nodes.count|pluralize }}</span>
+                </span>
+                {% if r.pk in bookmarked_ids %}
+                  {% include "roadmaps/_bookmark_button.html" with roadmap=r is_bookmarked=True %}
+                {% else %}
+                  {% include "roadmaps/_bookmark_button.html" with roadmap=r is_bookmarked=False %}
+                {% endif %}
+              </div>
             </div>
 
             <h2 class="font-heading text-xl font-bold text-ink mb-2">
@@ -88,12 +121,41 @@
         </article>
       {% endfor %}
     </div>
+
+    {% if page_obj.has_other_pages %}
+      <nav class="mt-8 pt-6 border-t-2 border-ink flex flex-wrap items-center justify-between gap-4" aria-label="Pagination">
+        <span class="sk-mono text-xs font-semibold text-muted">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}"
+               class="sk-btn text-xs py-1.5 px-3">Previous</a>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            <a href="?page={{ num }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}"
+               class="sk-btn text-xs py-1.5 px-3 sk-mono {% if num == page_obj.number %}sk-btn--primary{% endif %}"
+               {% if num == page_obj.number %}aria-current="page"{% endif %}>{{ num }}</a>
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}"
+               class="sk-btn text-xs py-1.5 px-3">Next</a>
+          {% endif %}
+        </div>
+      </nav>
+    {% endif %}
   {% else %}
     <div class="sk-card p-8 text-left">
       <p class="font-heading text-lg font-bold text-ink mb-1">No roadmaps found.</p>
-      <p class="text-sm text-muted mb-4">There are no published roadmaps matching this filter yet.</p>
-      {% if selected_category %}
-        <a href="{% url 'roadmaps:list' %}" class="sk-btn text-sm">Show all roadmaps</a>
+      <p class="text-sm text-muted mb-4">
+        {% if q %}
+          No published roadmaps matched "{{ q }}".
+        {% else %}
+          There are no published roadmaps matching this filter yet.
+        {% endif %}
+      </p>
+      {% if q or selected_category %}
+        <a href="{% url 'roadmaps:list' %}" class="sk-btn text-sm">Clear search</a>
       {% endif %}
     </div>
   {% endif %}

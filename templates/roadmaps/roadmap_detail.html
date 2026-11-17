@@ -21,9 +21,12 @@
         <span class="text-xs text-muted sk-mono">Source: {{ roadmap.source_attribution }}</span>
       {% endif %}
     </div>
-    <span class="sk-mono text-sm font-semibold text-ink">
-      {{ progress.completed }} / {{ progress.total }} topics &middot; {{ progress.percent }}%
-    </span>
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="sk-mono text-sm font-semibold text-ink">
+        {{ progress.completed }} / {{ progress.total }} topics &middot; {{ progress.percent }}%
+      </span>
+      {% include "roadmaps/_bookmark_button.html" with roadmap=roadmap is_bookmarked=is_bookmarked %}
+    </div>
   </div>
 
   <h1 id="roadmap-heading" class="font-heading text-2xl sm:text-3xl font-bold text-ink mb-2">

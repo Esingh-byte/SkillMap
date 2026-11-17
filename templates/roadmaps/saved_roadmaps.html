@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Saved roadmaps — SkillMap{% endblock %}
+{% block content %}
+<section class="mb-8 pb-6 border-b-2 border-ink flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-heading text-3xl sm:text-4xl font-bold text-ink mb-2">Saved roadmaps</h1>
+    <p class="text-sm sm:text-base text-muted">
+      Roadmaps you have bookmarked for quick access.
+    </p>
+  </div>
+  <a href="{% url 'roadmaps:list' %}" class="sk-btn text-sm">Browse all roadmaps</a>
+</section>
+
+<section aria-label="Bookmarked roadmaps">
+  {% if roadmaps %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for r in roadmaps %}
+        <article class="sk-card p-6 flex flex-col justify-between gap-5">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              {% if r.category %}
+                <span class="sk-badge">{{ r.category.name }}</span>
+              {% else %}
+                <span class="sk-badge">General</span>
+              {% endif %}
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-xs font-medium text-muted sk-mono">
+                  <span>{{ r.nodes.count }} step{{ r.nodes.count|pluralize }}</span>
+                </span>
+                {% include "roadmaps/_bookmark_button.html" with roadmap=r is_bookmarked=True %}
+              </div>
+            </div>
+
+            <h2 class="font-heading text-xl font-bold text-ink mb-2">
+              <a href="{% url 'roadmaps:detail' r.slug %}" class="hover:underline focus:underline">
+                {{ r.title }}
+              </a>
+            </h2>
+
+            {% if r.description %}
+              <p class="text-sm text-muted leading-relaxed">
+                {{ r.description|truncatewords:25 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="pt-4 border-t-2 border-ink flex items-center justify-between gap-3">
+            <a href="{% url 'roadmaps:detail' r.slug %}" class="sk-btn sk-btn--primary w-full justify-between">
+              <span>Start roadmap</span>
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="sk-card p-8 text-left">
+      <h2 class="font-heading text-xl font-bold text-ink mb-2">No saved roadmaps yet.</h2>
+      <p class="text-sm text-muted mb-5 max-w-lg">
+        Use the "Save" button on any roadmap card or roadmap header to bookmark it here.
+      </p>
+      <a href="{% url 'roadmaps:list' %}" class="sk-btn sk-btn--primary text-sm">
+        <span>Explore roadmaps</span>
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
