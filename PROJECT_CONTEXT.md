@@ -328,9 +328,9 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
     - `roadmap_list`: `total_duration` (sum of video durations per roadmap) and per-user enrollment/progress status (`Start` vs `Continue`).
     - `node_detail`: `next_node` (direct next `Node` object for the "Next topic" CTA; currently links back to `roadmaps:detail`), `nodes` / `node_statuses` (full roadmap syllabus with per-node `NodeProgress` status when reviewing an earlier completed node; currently inferred sequentially via `n.order < node.order`), and node-level aggregated watch totals (`total_watched_seconds`, `total_duration_seconds`, `remaining_seconds_needed`, `MM:SS` formatted durations).
 - Content pipeline (`dump_playlist` and `import_roadmap` management commands, `data/` example files and docs, unit tests in `roadmaps/tests/test_content_pipeline.py`)
+- Badge engine & Dashboard (`dashboard/services.py`, `seed_badges` management command, `award_badges` hooked into `complete_node`, `submit_quiz`, and `save_note`, `effective_streak`, `@login_required` dashboard view at `/`, `templates/dashboard/home.html`, and 15 unit/view tests in `dashboard/tests.py`)
 
 ### Pending
-- Dashboard view (still a stub), roadmap bookmark/search views
-- Dashboard
+- Roadmap bookmark/search views
 - Bookmarks and search
 - Documentation

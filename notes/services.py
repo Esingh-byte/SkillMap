@@ -6,4 +6,7 @@ def save_note(user, node, content: str) -> Note:
     note, _ = Note.objects.update_or_create(
         user=user, node=node, defaults={"content": content}
     )
+    from dashboard.services import award_badges
+
+    award_badges(user)
     return note

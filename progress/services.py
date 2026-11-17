@@ -236,6 +236,9 @@ def submit_quiz(user, node: Node, answers: Mapping[int, int]) -> QuizAttempt:
         )
         if passed:
             complete_node(user, node)
+            from dashboard.services import award_badges
+
+            award_badges(user)
     return attempt
 
 
@@ -295,6 +298,10 @@ def complete_node(user, node: Node) -> bool:
         user.__class__.objects.filter(pk=user.pk).update(xp=F("xp") + XP_PER_NODE_COMPLETED)
         user.refresh_from_db(fields=["xp"])
         update_streak(user)
+
+    from dashboard.services import award_badges
+
+    award_badges(user)
 
     stats = roadmap_progress(user, node.roadmap)
     return stats["total"] > 0 and stats["completed"] == stats["total"]
