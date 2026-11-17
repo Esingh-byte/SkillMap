@@ -31,13 +31,19 @@ else:
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    for h in os.environ.get(
+        "ALLOWED_HOSTS", "127.0.0.1,localhost,.vercel.app"
+    ).split(",")
     if h.strip()
 ]
+if os.environ.get("VERCEL") and ".vercel.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(".vercel.app")
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+    for origin in os.environ.get(
+        "CSRF_TRUSTED_ORIGINS", "https://*.vercel.app"
+    ).split(",")
     if origin.strip()
 ]
 
@@ -91,10 +97,14 @@ TEMPLATES = [
 WSGI_APPLICATION = "roadmaplearn.wsgi.application"
 
 # Database – SQLite for dev, PostgreSQL-ready via env vars
+# On Vercel serverless (read-only /var/task), default SQLite to writable /tmp/db.sqlite3
+_default_sqlite_path = (
+    "/tmp/db.sqlite3" if os.environ.get("VERCEL") else str(BASE_DIR / "db.sqlite3")
+)
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_NAME", str(BASE_DIR / "db.sqlite3")),
+        "NAME": os.environ.get("DB_NAME", _default_sqlite_path),
         "USER": os.environ.get("DB_USER", ""),
         "PASSWORD": os.environ.get("DB_PASSWORD", ""),
         "HOST": os.environ.get("DB_HOST", ""),
