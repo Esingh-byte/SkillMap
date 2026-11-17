@@ -1,4 +1,4 @@
-# RoadmapLearn
+# SkillMap
 
 > A Django web app for college students. Pick a career roadmap, learn each topic through free YouTube videos, and unlock the next node only after genuinely watching the video **and** passing the quiz.
 
