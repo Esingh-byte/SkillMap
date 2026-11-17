@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Page not found (404) — SkillMap{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto py-8">
+  <section class="sk-card p-6 sm:p-8" aria-labelledby="err-404-heading">
+    <div class="flex items-center justify-between gap-2 pb-4 mb-5 border-b-2 border-ink">
+      <span class="sk-badge sk-badge--marigold sk-mono">ERROR 404</span>
+      <span class="sk-mono text-xs text-muted">Missing page</span>
+    </div>
+
+    <h1 id="err-404-heading" class="font-heading text-2xl sm:text-3xl font-bold text-ink mb-2">
+      We couldn't find that page.
+    </h1>
+    <p class="text-sm sm:text-base text-muted leading-relaxed mb-6">
+      The roadmap or topic you requested doesn't exist, may have been moved, or isn't published yet.
+    </p>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <a href="{% url 'roadmaps:list' %}" class="sk-btn sk-btn--primary text-sm">
+        <span>Browse roadmaps</span>
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+      <a href="{% url 'dashboard:home' %}" class="sk-btn text-sm">Go to dashboard</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

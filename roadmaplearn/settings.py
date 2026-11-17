@@ -9,20 +9,37 @@ Never commit .env to version control.
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Must be set via the SECRET_KEY environment variable.
-# A safe placeholder is kept so `check` passes in bare CI; replace it via .env.
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-dev-only-placeholder-set-SECRET_KEY-env-var",
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", "True").strip().lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+# SECURITY WARNING: keep the secret key used in production secret!
+# Must be set via the SECRET_KEY environment variable when DEBUG is False.
+# A dev fallback is allowed only when DEBUG is True.
+_raw_secret_key = os.environ.get("SECRET_KEY", "").strip()
+if not _raw_secret_key:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "The SECRET_KEY environment variable must be set when DEBUG is False."
+        )
+    SECRET_KEY = "django-insecure-dev-only-placeholder-set-SECRET_KEY-env-var"
+else:
+    SECRET_KEY = _raw_secret_key
+
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    if h.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -117,3 +134,15 @@ YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+# Production security settings when DEBUG is False
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_REFERRER_POLICY = "same-origin"
+    SECURE_SSL_REDIRECT = os.environ.get(
+        "SECURE_SSL_REDIRECT", "True"
+    ).strip().lower() in ("true", "1", "yes")

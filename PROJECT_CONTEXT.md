@@ -334,6 +334,7 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
   - `POST /roadmaps/<slug>/bookmark/` (`roadmaps:bookmark`, login required, CSRF): toggles `RoadmapBookmark` on published roadmaps; returns `_bookmark_button.html` partial for HTMX requests or redirects back with a Django message for non-JS requests.
   - `GET /roadmaps/saved/` (`roadmaps:saved`, login required): displays the current user's bookmarked published roadmaps with an empty state, linked from the navbar when logged in.
   - Unit and view tests in `roadmaps/tests/test_bookmarks_and_search.py`.
+- Security hardening, custom error pages (`templates/404.html`, context-processor-free `templates/500.html`), `demo_fastforward` management command (`progress/management/commands/demo_fastforward.py`, `DEBUG`-only), and endpoint security tests (`progress/tests/test_security_and_demo.py`).
 
 ### Pending
 - Documentation

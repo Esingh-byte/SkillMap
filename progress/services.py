@@ -205,9 +205,11 @@ def submit_quiz(user, node: Node, answers: Mapping[int, int]) -> QuizAttempt:
     question_ids = {q.pk for q in questions}
     chosen = {}
     for raw_q, raw_c in answers.items():
+        if isinstance(raw_q, bool) or isinstance(raw_c, bool):
+            raise InvalidAnswerError("Answers must be integer ids.")
         try:
             q_id, c_id = int(raw_q), int(raw_c)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             raise InvalidAnswerError("Answers must be integer ids.")
         if q_id not in question_ids:
             raise InvalidAnswerError(f"Question {q_id} is not part of this quiz.")

@@ -1,3 +1,5 @@
+import math
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -23,16 +25,31 @@ from .services import (
 def heartbeat(request):
     try:
         data = parse_json(request)
-        video_id = int(data["video_id"])
-        current_time = float(data["current_time"])
-        playback_rate = float(data.get("playback_rate", 1.0))
+        raw_vid = data["video_id"]
+        raw_time = data["current_time"]
+        raw_rate = data.get("playback_rate", 1.0)
+        if (
+            isinstance(raw_vid, bool)
+            or isinstance(raw_time, bool)
+            or isinstance(raw_rate, bool)
+        ):
+            raise ValueError("Booleans are not valid numbers.")
+        video_id = int(raw_vid)
+        current_time = float(raw_time)
+        playback_rate = float(raw_rate)
     except BadRequest as exc:
         return json_error(str(exc), 400)
-    except (KeyError, TypeError, ValueError):
+    except (KeyError, TypeError, ValueError, OverflowError):
         return json_error(
             "video_id, current_time and playback_rate must be numbers.", 400
         )
-    if current_time != current_time or playback_rate != playback_rate:  # NaN
+    if (
+        not math.isfinite(current_time)
+        or not math.isfinite(playback_rate)
+        or current_time < 0
+        or video_id <= 0
+        or video_id > 2**63 - 1
+    ):
         return json_error("Invalid numeric value.", 400)
 
     video = get_object_or_404(Video.objects.select_related("node__roadmap"), pk=video_id)
