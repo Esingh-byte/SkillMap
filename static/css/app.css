@@ -1,0 +1,280 @@
+/* ==========================================================================
+   SkillMap / RoadmapLearn — "Printed Worksheet" Design System
+   Plain CSS only. No gradients, glassmorphism, glows, or pulse animations.
+   ========================================================================== */
+
+:root {
+  --paper: #F3EDE2;
+  --card: #FBF8F1;
+  --ink: #1C1A17;
+  --muted: #6B645A;
+  --marigold: #F4B942;
+  --vermilion: #C8401B;
+  --forest: #2F6B4F;
+  --locked: #A8A196;
+
+  --font-heading: "Fraunces", Georgia, "Times New Roman", Times, serif;
+  --font-body: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Base document */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.sk-heading {
+  font-family: var(--font-heading);
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Monospace utility for XP, durations, step numbers */
+.sk-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accessible focus outlines */
+:focus-visible {
+  outline: 2px solid var(--vermilion);
+  outline-offset: 2px;
+}
+
+/* Links */
+.sk-link {
+  color: var(--vermilion);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.sk-link:hover {
+  color: var(--ink);
+}
+
+/* Worksheet Card */
+.sk-card {
+  background-color: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Tactile Worksheet Buttons */
+.sk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  background-color: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.sk-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.sk-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.sk-btn--primary {
+  background-color: var(--marigold);
+  color: var(--ink);
+}
+
+.sk-btn--ghost {
+  background-color: transparent;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.sk-btn--ghost:hover {
+  background-color: var(--card);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.sk-btn--ghost:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+/* Badges */
+.sk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  background-color: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+}
+
+.sk-badge--marigold {
+  background-color: var(--marigold);
+  color: var(--ink);
+}
+
+.sk-badge--forest {
+  background-color: var(--forest);
+  color: var(--card);
+}
+
+.sk-badge--locked {
+  background-color: var(--paper);
+  color: var(--muted);
+  border-color: var(--locked);
+}
+
+/* Inputs & Form Controls */
+.sk-input,
+.sk-form input[type="text"],
+.sk-form input[type="email"],
+.sk-form input[type="password"],
+.sk-form input[type="search"],
+.sk-form input[type="url"],
+.sk-form input[type="number"],
+.sk-form textarea,
+.sk-form select {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background-color: #FFFFFF;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.sk-input::placeholder,
+.sk-form input::placeholder,
+.sk-form textarea::placeholder {
+  color: var(--muted);
+}
+
+.sk-input:focus-visible,
+.sk-form input:focus-visible,
+.sk-form textarea:focus-visible,
+.sk-form select:focus-visible {
+  outline: 2px solid var(--vermilion);
+  outline-offset: 1px;
+}
+
+/* Diagonal SVG hatch pattern for locked items (no CSS gradients) */
+.sk-hatch {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4' stroke='%23A8A196' stroke-width='1.5'/%3E%3C/svg%3E");
+  border-color: var(--locked);
+  color: var(--muted);
+}
+
+/* Segmented progress blocks (one block per item, filled/empty) */
+.sk-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.sk-blocks__item,
+.sk-block {
+  width: 1.25rem;
+  height: 0.625rem;
+  background-color: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+}
+
+.sk-blocks__item--filled,
+.sk-block--filled {
+  background-color: var(--forest);
+}
+
+.sk-blocks__item--active,
+.sk-block--active {
+  background-color: var(--marigold);
+}
+
+.sk-blocks__item--empty,
+.sk-block--empty {
+  background-color: var(--paper);
+}
+
+/* Error & Alert boxes */
+.sk-alert {
+  background-color: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-left: 6px solid var(--vermilion);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+}
+
+.sk-alert--success {
+  border-left-color: var(--forest);
+}
+
+.sk-alert--info {
+  border-left-color: var(--marigold);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .sk-btn:hover,
+  .sk-btn:active,
+  .sk-btn--ghost:hover,
+  .sk-btn--ghost:active {
+    transform: none;
+  }
+}

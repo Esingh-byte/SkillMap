@@ -1,25 +1,121 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}RoadmapLearn{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SkillMap{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#F3EDE2',
+            card: '#FBF8F1',
+            ink: '#1C1A17',
+            muted: '#6B645A',
+            marigold: '#F4B942',
+            vermilion: '#C8401B',
+            forest: '#2F6B4F',
+            locked: '#A8A196',
+          },
+          fontFamily: {
+            heading: ['"Fraunces"', 'Georgia', '"Times New Roman"', 'Times', 'serif'],
+            sans: ['"Instrument Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body>
-  <nav>
-    <a href="{% url 'roadmaps:list' %}">Roadmaps</a>
-    {% if user.is_authenticated %}
-      {{ user.username }} ({{ user.xp }} XP)
-      <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
-        {% csrf_token %}<button type="submit">Log out</button>
-      </form>
-    {% else %}
-      <a href="{% url 'accounts:login' %}">Log in</a>
-      <a href="{% url 'accounts:signup' %}">Sign up</a>
-    {% endif %}
-  </nav>
-  <hr>
-  {% block content %}{% endblock %}
-  <hr>
-  <small>Roadmap structure inspired by roadmap.sh. Videos belong to their respective creators.</small>
+<body class="min-h-screen flex flex-col bg-paper text-ink font-sans">
+  <header class="bg-card border-b-2 border-ink">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4" aria-label="Main navigation">
+      <div class="flex items-center gap-6">
+        <a href="{% url 'roadmaps:list' %}" class="inline-flex items-center gap-2 font-heading text-xl font-bold text-ink tracking-tight no-underline">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/>
+            <path d="M9 3v15"/>
+            <path d="M15 6v15"/>
+          </svg>
+          <span>SkillMap</span>
+        </a>
+        <div class="flex items-center gap-4 text-sm font-semibold">
+          <a href="{% url 'roadmaps:list' %}" class="px-2 py-1 rounded hover:bg-paper transition-colors">Roadmaps</a>
+          <a href="{% url 'dashboard:home' %}" class="px-2 py-1 rounded hover:bg-paper transition-colors">Dashboard</a>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        {% if user.is_authenticated %}
+          <span class="sk-badge sk-badge--marigold sk-mono" title="Total experience points">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span>{{ user.xp }} XP</span>
+          </span>
+          <span class="sk-badge sk-mono" title="Daily learning streak">
+            <svg class="w-3.5 h-3.5 shrink-0 text-vermilion" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+            <span>{{ user.streak_days }}d</span>
+          </span>
+          <span class="text-sm font-semibold px-1">{{ user.username }}</span>
+          <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="sk-btn sk-btn--ghost text-sm py-1 px-3">Log out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="sk-btn sk-btn--ghost text-sm py-1.5 px-3.5">Log in</a>
+          <a href="{% url 'accounts:signup' %}" class="sk-btn sk-btn--primary text-sm py-1.5 px-3.5">Sign up</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  {% if messages %}
+    <div class="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-6 space-y-3" role="region" aria-label="Notifications">
+      {% for message in messages %}
+        <div class="sk-alert {% if 'success' in message.tags %}sk-alert--success{% elif 'info' in message.tags %}sk-alert--info{% endif %} flex items-start gap-3" role="status">
+          {% if 'success' in message.tags %}
+            <svg class="w-5 h-5 shrink-0 text-forest mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <div class="text-sm"><strong class="font-semibold">Done:</strong> {{ message }}</div>
+          {% elif 'error' in message.tags or 'warning' in message.tags %}
+            <svg class="w-5 h-5 shrink-0 text-vermilion mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="text-sm"><strong class="font-semibold">Notice:</strong> {{ message }}</div>
+          {% else %}
+            <svg class="w-5 h-5 shrink-0 text-ink mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <div class="text-sm"><strong class="font-semibold">Note:</strong> {{ message }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10 flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t-2 border-ink bg-card mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-sm text-muted">
+      <p>Roadmap structure inspired by roadmap.sh. Videos belong to their creators and play from YouTube.</p>
+    </div>
+  </footer>
 </body>
 </html>

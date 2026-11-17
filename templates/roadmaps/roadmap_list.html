@@ -1,20 +1,101 @@
 {% extends "base.html" %}
-{% block title %}Roadmaps{% endblock %}
+{% block title %}Roadmaps — SkillMap{% endblock %}
 {% block content %}
-<h1>Roadmaps</h1>
-<p>
-  Category:
-  <a href="{% url 'roadmaps:list' %}">All</a>
-  {% for c in categories %}
-    | <a href="?category={{ c.slug }}">{% if c.slug == selected_category %}<strong>{{ c.name }}</strong>{% else %}{{ c.name }}{% endif %}</a>
-  {% endfor %}
-</p>
-<ul>
-  {% for r in roadmaps %}
-    <li><a href="{% url 'roadmaps:detail' r.slug %}">{{ r.title }}</a>
-      {% if r.category %}[{{ r.category.name }}]{% endif %} - {{ r.description|truncatewords:25 }}</li>
-  {% empty %}
-    <li>No roadmaps found.</li>
-  {% endfor %}
-</ul>
+<section class="mb-8 pb-6 border-b-2 border-ink">
+  <div class="max-w-2xl text-left">
+    <h1 class="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-ink mb-3">Learn it in order.</h1>
+    <p class="text-base sm:text-lg text-muted leading-relaxed">
+      Pick a roadmap, watch the videos, pass the quiz. The next step opens only when you've done the last one.
+    </p>
+  </div>
+</section>
+
+<section class="mb-8" aria-label="Filter roadmaps by category">
+  <div class="flex flex-wrap items-center gap-2.5">
+    <span class="text-xs font-bold uppercase tracking-wider text-muted mr-1 sk-mono">Category:</span>
+    <a href="{% url 'roadmaps:list' %}"
+       class="sk-btn text-sm py-1.5 px-3.5 {% if not selected_category %}sk-btn--primary{% endif %}"
+       {% if not selected_category %}aria-current="page"{% endif %}>
+      {% if not selected_category %}
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      {% endif %}
+      <span>All</span>
+    </a>
+    {% for c in categories %}
+      <a href="?category={{ c.slug }}"
+         class="sk-btn text-sm py-1.5 px-3.5 {% if c.slug == selected_category %}sk-btn--primary{% endif %}"
+         {% if c.slug == selected_category %}aria-current="page"{% endif %}>
+        {% if c.slug == selected_category %}
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        {% endif %}
+        <span>{{ c.name }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section aria-label="Available roadmaps">
+  {% if roadmaps %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for r in roadmaps %}
+        <article class="sk-card p-6 flex flex-col justify-between gap-5">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              {% if r.category %}
+                <span class="sk-badge">{{ r.category.name }}</span>
+              {% else %}
+                <span class="sk-badge">General</span>
+              {% endif %}
+              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-muted sk-mono">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="8" y1="6" x2="21" y2="6"/>
+                  <line x1="8" y1="12" x2="21" y2="12"/>
+                  <line x1="8" y1="18" x2="21" y2="18"/>
+                  <line x1="3" y1="6" x2="3.01" y2="6"/>
+                  <line x1="3" y1="12" x2="3.01" y2="12"/>
+                  <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                <span>{{ r.nodes.count }} step{{ r.nodes.count|pluralize }}</span>
+              </span>
+            </div>
+
+            <h2 class="font-heading text-xl font-bold text-ink mb-2">
+              <a href="{% url 'roadmaps:detail' r.slug %}" class="hover:underline focus:underline">
+                {{ r.title }}
+              </a>
+            </h2>
+
+            {% if r.description %}
+              <p class="text-sm text-muted leading-relaxed">
+                {{ r.description|truncatewords:25 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="pt-4 border-t-2 border-ink flex items-center justify-between gap-3">
+            <a href="{% url 'roadmaps:detail' r.slug %}" class="sk-btn sk-btn--primary w-full justify-between">
+              <span>Start roadmap</span>
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="sk-card p-8 text-left">
+      <p class="font-heading text-lg font-bold text-ink mb-1">No roadmaps found.</p>
+      <p class="text-sm text-muted mb-4">There are no published roadmaps matching this filter yet.</p>
+      {% if selected_category %}
+        <a href="{% url 'roadmaps:list' %}" class="sk-btn text-sm">Show all roadmaps</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
 {% endblock %}

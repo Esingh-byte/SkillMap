@@ -287,6 +287,13 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
 - Nodes without a quiz (or with no questions) complete via `try_complete_node_without_quiz` once the video check passes.
 - Streak: same day no change; yesterday +1; otherwise reset to 1.
 
+## Design system
+- **Aesthetic**: Warm "printed worksheet" look (`static/css/app.css`). Tailwind Play CDN (`https://cdn.tailwindcss.com/3.4.17`) is used for layout/spacing during development only; a compiled CSS build step is required before any production deployment.
+- **Colour tokens (`:root`)**: `--paper: #F3EDE2`, `--card: #FBF8F1`, `--ink: #1C1A17`, `--muted: #6B645A`, `--marigold: #F4B942`, `--vermilion: #C8401B` (links/accents only), `--forest: #2F6B4F` (completed), `--locked: #A8A196`.
+- **Fonts (Google Fonts, `display=swap` with full fallbacks)**: `Fraunces` (headings), `Instrument Sans` (body), `JetBrains Mono` (XP, durations, step numbers).
+- **Component classes (`static/css/app.css`, plain CSS, no `@apply`)**: `.sk-card` (`2px solid var(--ink)`, `border-radius: 6px`, `4px 4px 0 var(--ink)` shadow), `.sk-btn`, `.sk-btn--primary` (marigold bg, ink text), `.sk-btn--ghost`, `.sk-badge`, `.sk-input` (and `.sk-form` inputs), `.sk-hatch` (SVG diagonal hatch for locked items), `.sk-mono`, `.sk-blocks` (segmented progress blocks: `.sk-block--filled`, `.sk-block--active`, `.sk-block--empty`), `.sk-alert`.
+- **Forbidden**: CSS gradients, glassmorphism/backdrop blur, glows or ring effects, pulse animations, emoji as icons, big `rounded-2xl` cards, icon-in-coloured-circle cards, centered hero with two buttons. Use small inline SVG icons (`stroke-width="2"`) and always pair status colours with icons + text.
+
 ## Project status
 
 ### Done
@@ -296,16 +303,17 @@ Implemented in `progress/services.py` (tests in `progress/tests/test_services.py
 - Admin Video list crash fixed; admin smoke tests (`roadmaps/tests/test_admin_smoke.py`)
 - Progression engine (`progress/services.py`) with unit tests
 - Venv, `.gitignore`, `.env.example`, git + GitHub remote
-- Core views, URLs and JSON endpoints (simple functional templates in `templates/`, unstyled) with tests in `*/tests/test_views.py`:
+- Core views, URLs and JSON endpoints with tests in `*/tests/test_views.py`:
   - `accounts`: login / logout (POST) / signup (`accounts/signup/`)
   - `roadmaps`: `roadmap_list` (public, `?category=<slug>` filter), `roadmap_detail` (login; auto-enrolls), `node_detail` (login; 403 if not enrolled or LOCKED)
   - `POST /progress/heartbeat/` → `{status, watched_seconds, duration_seconds (node-level, embeddable videos), video_passed, node_completed}`; errors: NotEnrolled/NodeLocked 403, VideoNotEmbeddable/bad input 400
   - `POST /quizzes/<node_id>/submit/` → `{passed, score_percent, node_completed, xp_awarded}`; errors: VideoCheckNotPassed/NodeLocked 403, InvalidAnswer 400
   - `POST /notes/<node_id>/save/` (JSON or form) → `{status: "saved", updated_at}`
   - All progress/quiz/note endpoints use `@login_required` (anonymous → 302 to login). JSON errors: `{status: "error", error: msg}`. Helpers in `roadmaplearn/http.py`.
+- Design system (`static/css/app.css`) and restyled `base.html`, `roadmap_list.html`, `accounts/login.html`, `accounts/signup.html`
 
 ### Pending
-- Styling (Tailwind/HTMX) of templates
+- Restyle `roadmap_detail.html` and `node_detail.html`
 - Dashboard view (still a stub), roadmap bookmark/search views
 - YouTube playlist importer
 - Dashboard
