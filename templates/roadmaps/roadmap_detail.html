@@ -1,19 +1,213 @@
 {% extends "base.html" %}
-{% block title %}{{ roadmap.title }}{% endblock %}
+{% block title %}{{ roadmap.title }} — SkillMap{% endblock %}
 {% block content %}
-<h1>{{ roadmap.title }}</h1>
-<p>{{ roadmap.description }}</p>
-{% if roadmap.source_attribution %}<p><small>Source: {{ roadmap.source_attribution }}</small></p>{% endif %}
-<p>Progress: {{ progress.completed }}/{{ progress.total }} ({{ progress.percent }}%)</p>
-<ol>
-  {% for row in nodes %}
+<nav class="mb-6 text-sm" aria-label="Breadcrumb">
+  <ol class="flex flex-wrap items-center gap-2 text-muted">
     <li>
-      {% if row.status == "LOCKED" %}
-        {{ row.node.title }} - LOCKED
-      {% else %}
-        <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}">{{ row.node.title }}</a> - {{ row.status }}
-      {% endif %}
+      <a href="{% url 'roadmaps:list' %}" class="hover:text-ink underline underline-offset-2 font-medium">Roadmaps</a>
     </li>
-  {% endfor %}
-</ol>
+    <li aria-hidden="true">/</li>
+    <li class="text-ink font-semibold" aria-current="page">{{ roadmap.title }}</li>
+  </ol>
+</nav>
+
+<section class="sk-card p-6 sm:p-8 mb-10" aria-labelledby="roadmap-heading">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+    <div class="flex flex-wrap items-center gap-2">
+      {% if roadmap.category %}
+        <span class="sk-badge">{{ roadmap.category.name }}</span>
+      {% endif %}
+      {% if roadmap.source_attribution %}
+        <span class="text-xs text-muted sk-mono">Source: {{ roadmap.source_attribution }}</span>
+      {% endif %}
+    </div>
+    <span class="sk-mono text-sm font-semibold text-ink">
+      {{ progress.completed }} / {{ progress.total }} topics &middot; {{ progress.percent }}%
+    </span>
+  </div>
+
+  <h1 id="roadmap-heading" class="font-heading text-2xl sm:text-3xl font-bold text-ink mb-2">
+    {{ roadmap.title }}
+  </h1>
+
+  {% if roadmap.description %}
+    <p class="text-muted text-sm sm:text-base leading-relaxed max-w-3xl mb-6">
+      {{ roadmap.description }}
+    </p>
+  {% endif %}
+
+  <div class="pt-4 border-t-2 border-ink flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="sk-blocks"
+         role="progressbar"
+         aria-valuenow="{{ progress.percent }}"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-label="Completed {{ progress.completed }} of {{ progress.total }} topics ({{ progress.percent }}%)">
+      {% for row in nodes %}
+        <span class="sk-block {% if row.status == 'COMPLETED' %}sk-block--filled{% elif row.status == 'UNLOCKED' %}sk-block--active{% else %}sk-block--empty{% endif %}"
+              title="Step {{ forloop.counter|stringformat:'02d' }}: {{ row.node.title }} ({{ row.status }})"></span>
+      {% empty %}
+        <span class="text-xs text-muted sk-mono">No topics added yet.</span>
+      {% endfor %}
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4 text-xs text-muted sk-mono">
+      <span class="inline-flex items-center gap-1.5">
+        <span class="sk-block sk-block--filled inline-block w-3 h-3" aria-hidden="true"></span>
+        <span>Completed</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="sk-block sk-block--active inline-block w-3 h-3" aria-hidden="true"></span>
+        <span>Up next</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="sk-block sk-block--empty inline-block w-3 h-3" aria-hidden="true"></span>
+        <span>Locked</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Learning path">
+  <h2 class="font-heading text-xl font-bold text-ink mb-6">Topics in order</h2>
+
+  {% if nodes %}
+    <ol class="space-y-0">
+      {% for row in nodes %}
+        <li class="relative flex items-stretch gap-4 sm:gap-6">
+          <!-- Left column: numbered square marker + 2px ink vertical connector line -->
+          <div class="flex flex-col items-center shrink-0">
+            {% if row.status == "COMPLETED" %}
+              <div class="w-12 h-12 rounded border-2 border-ink bg-forest text-card flex flex-col items-center justify-center sk-mono"
+                   title="Step {{ forloop.counter|stringformat:'02d' }} — Completed">
+                <svg class="w-4 h-4 shrink-0" role="img" aria-label="Completed topic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span class="text-[11px] font-bold leading-none mt-0.5">{{ forloop.counter|stringformat:"02d" }}</span>
+              </div>
+            {% elif row.status == "UNLOCKED" %}
+              <div class="w-12 h-12 rounded border-2 border-ink bg-marigold text-ink shadow-[4px_4px_0_#1C1A17] flex flex-col items-center justify-center sk-mono"
+                   title="Step {{ forloop.counter|stringformat:'02d' }} — Up next">
+                <svg class="w-4 h-4 shrink-0" role="img" aria-label="Unlocked topic — Up next" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <span class="text-[11px] font-bold leading-none mt-0.5">{{ forloop.counter|stringformat:"02d" }}</span>
+              </div>
+            {% else %}
+              <div class="w-12 h-12 rounded border-2 border-ink sk-hatch flex flex-col items-center justify-center sk-mono"
+                   title="Step {{ forloop.counter|stringformat:'02d' }} — Locked">
+                <svg class="w-4 h-4 shrink-0" role="img" aria-label="Locked topic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span class="text-[11px] font-bold leading-none mt-0.5">{{ forloop.counter|stringformat:"02d" }}</span>
+              </div>
+            {% endif %}
+
+            {% if not forloop.last %}
+              <div class="w-[2px] flex-1 bg-ink my-1 min-h-[1.75rem]" aria-hidden="true"></div>
+            {% endif %}
+          </div>
+
+          <!-- Right column: topic card -->
+          <div class="flex-1 {% if not forloop.last %}pb-6{% endif %}">
+            {% if row.status == "COMPLETED" %}
+              <article class="sk-card p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="sk-mono text-xs font-bold text-muted">STEP {{ forloop.counter|stringformat:"02d" }}</span>
+                    <span class="sk-badge sk-badge--forest">
+                      <svg class="w-3.5 h-3.5 shrink-0" role="img" aria-label="Completed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Completed</span>
+                    </span>
+                  </div>
+                  <h3 class="font-heading text-lg sm:text-xl font-bold text-ink mb-1">
+                    <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}" class="hover:underline">
+                      {{ row.node.title }}
+                    </a>
+                  </h3>
+                  {% if row.node.description %}
+                    <p class="text-sm text-muted leading-relaxed">{{ row.node.description }}</p>
+                  {% endif %}
+                </div>
+
+                <div class="shrink-0">
+                  <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}" class="sk-btn text-sm">
+                    <span>Review</span>
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+
+            {% elif row.status == "UNLOCKED" %}
+              <article class="sk-card p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="sk-mono text-xs font-bold text-ink">STEP {{ forloop.counter|stringformat:"02d" }}</span>
+                    <span class="sk-badge sk-badge--marigold">
+                      <svg class="w-3.5 h-3.5 shrink-0" role="img" aria-label="Up next" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                      </svg>
+                      <span>Up next</span>
+                    </span>
+                  </div>
+                  <h3 class="font-heading text-lg sm:text-xl font-bold text-ink mb-1">
+                    <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}" class="hover:underline">
+                      {{ row.node.title }}
+                    </a>
+                  </h3>
+                  {% if row.node.description %}
+                    <p class="text-sm text-muted leading-relaxed">{{ row.node.description }}</p>
+                  {% endif %}
+                </div>
+
+                <div class="shrink-0">
+                  <a href="{% url 'roadmaps:node_detail' roadmap.slug row.node.slug %}" class="sk-btn sk-btn--primary text-sm">
+                    <span>Continue</span>
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+
+            {% else %}
+              <article class="rounded-[6px] border-2 border-dashed border-locked bg-paper p-5 sm:p-6 text-muted opacity-80 select-none" aria-disabled="true">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="sk-mono text-xs font-bold text-muted">STEP {{ forloop.counter|stringformat:"02d" }}</span>
+                    <span class="sk-badge sk-badge--locked">
+                      <svg class="w-3.5 h-3.5 shrink-0" role="img" aria-label="Locked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      <span>Locked</span>
+                    </span>
+                  </div>
+                  <span class="text-xs font-medium text-muted sk-mono">Finish the previous topic to unlock</span>
+                </div>
+                <h3 class="font-heading text-lg sm:text-xl font-bold text-muted mb-1">
+                  {{ row.node.title }}
+                </h3>
+                {% if row.node.description %}
+                  <p class="text-sm text-muted leading-relaxed">{{ row.node.description }}</p>
+                {% endif %}
+              </article>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <div class="sk-card p-6">
+      <p class="text-sm text-muted">No topics have been published for this roadmap yet.</p>
+    </div>
+  {% endif %}
+</section>
 {% endblock %}
