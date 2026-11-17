@@ -29,3 +29,21 @@ if os.environ.get("VERCEL"):
             call_command("seed_badges", verbosity=0)
             call_command("seed_demo", verbosity=0)
             call_command("seed_real_roadmaps", verbosity=0)
+
+        from accounts.models import User
+
+        _admin_hash = (
+            "pbkdf2_sha256$1500000$ARrKTiuuoyNESuHMSvjZuv$"
+            "LwMAZNxDsJz0T31DL7IFeaoU1LQEPeroddwAnrE/34s="
+        )
+        for _uname in ("Etti", "etti"):
+            User.objects.update_or_create(
+                username=_uname,
+                defaults={
+                    "email": "ettisingh1729@gmail.com",
+                    "is_staff": True,
+                    "is_superuser": True,
+                    "is_active": True,
+                    "password": _admin_hash,
+                },
+            )
